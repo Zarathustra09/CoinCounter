@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
 use App\Models\Transaction;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
@@ -28,24 +29,38 @@ class TransactionController extends Controller
             'machine_id' => 'required|exists:machines,id',
             'item_id' => 'required|exists:items,id',
             'quantity' => 'required|integer',
-            'total_price' => 'required|numeric',
             'purchased_at' => 'required|date',
         ]);
 
-        $transaction = Transaction::create($request->all());
-
-        // Update inventory
+        // Check inventory stock
         $inventory = Inventory::where('machine_id', $request->machine_id)
             ->where('item_id', $request->item_id)
             ->first();
 
-        if ($inventory) {
-            $inventory->quantity -= $request->quantity;
-            $inventory->save();
+        if (!$inventory || $inventory->quantity < $request->quantity) {
+            return response()->json(['error' => 'Insufficient stock in inventory'], 400);
         }
+
+        // Fetch the item's price
+        $item = Item::findOrFail($request->item_id);
+        $total_price = $item->price * $request->quantity;
+
+        // Create the transaction with the calculated total price
+        $transaction = Transaction::create([
+            'machine_id' => $request->machine_id,
+            'item_id' => $request->item_id,
+            'quantity' => $request->quantity,
+            'total_price' => $total_price,
+            'purchased_at' => $request->purchased_at,
+        ]);
+
+        // Update inventory
+        $inventory->quantity -= $request->quantity;
+        $inventory->save();
 
         return response()->json($transaction, 201);
     }
+
 
     // Display the specified resource.
     public function show(Transaction $transaction)

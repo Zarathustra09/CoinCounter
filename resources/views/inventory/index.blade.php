@@ -69,13 +69,21 @@
         function createInventory() {
             $.when(
                 $.get('/api/machines'),
-                $.get('/api/items')
-            ).done(function(machinesResponse, itemsResponse) {
+                $.get('/api/items'),
+                $.get('/api/inventories')
+            ).done(function(machinesResponse, itemsResponse, inventoriesResponse) {
                 const machines = machinesResponse[0].data; // Access the data property
                 const items = itemsResponse[0]; // Assuming items response is an array
+                const inventories = inventoriesResponse[0]; // Assuming inventories response is an array
+
+                // Get the IDs of items already in the machine
+                const itemIdsInMachine = inventories.map(inventory => inventory.item_id);
+
+                // Filter out items already in the machine
+                const availableItems = items.filter(item => !itemIdsInMachine.includes(item.id));
 
                 let machineOptions = machines.map(machine => `<option value="${machine.id}">${machine.identifier}</option>`).join('');
-                let itemOptions = items.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+                let itemOptions = availableItems.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
 
                 Swal.fire({
                     title: 'Create Inventory',
@@ -121,15 +129,40 @@
         }
 
         function editInventory(id) {
-            $.get(`/api/inventories/${id}`, function(inventory) {
+            $.when(
+                $.get(`/api/inventories/${id}`),
+                $.get('/api/machines'),
+                $.get('/api/items'),
+                $.get('/api/inventories')
+            ).done(function(inventoryResponse, machinesResponse, itemsResponse, inventoriesResponse) {
+                const inventory = inventoryResponse[0];
+                const machines = machinesResponse[0].data;
+                const items = itemsResponse[0];
+                const inventories = inventoriesResponse[0];
+
+                // Get the IDs of items already in the machine
+                const itemIdsInMachine = inventories.map(inventory => inventory.item_id);
+
+                // Filter out items already in the machine, but include the current item
+                const availableItems = items.filter(item => !itemIdsInMachine.includes(item.id) || item.id === inventory.item_id);
+
+                let machineOptions = machines.map(machine => `<option value="${machine.id}" ${machine.id === inventory.machine_id ? 'selected' : ''}>${machine.identifier}</option>`).join('');
+                let itemOptions = availableItems.map(item => `<option value="${item.id}" ${item.id === inventory.item_id ? 'selected' : ''}>${item.name}</option>`).join('');
+
                 Swal.fire({
                     title: 'Edit Inventory',
                     html: `
-                        <input type="hidden" id="inventory-id" value="${inventory.id}">
-                        <input type="number" id="inventory-machine-id" class="swal2-input" placeholder="Machine ID" value="${inventory.machine_id}">
-                        <input type="number" id="inventory-item-id" class="swal2-input" placeholder="Item ID" value="${inventory.item_id}">
-                        <input type="number" id="inventory-quantity" class="swal2-input" placeholder="Quantity" value="${inventory.quantity}">
-                    `,
+                <input type="hidden" id="inventory-id" value="${inventory.id}">
+                <select id="inventory-machine-id" class="swal2-input">
+                    <option value="" disabled>Select Machine</option>
+                    ${machineOptions}
+                </select>
+                <select id="inventory-item-id" class="swal2-input">
+                    <option value="" disabled>Select Item</option>
+                    ${itemOptions}
+                </select>
+                <input type="number" id="inventory-quantity" class="swal2-input" placeholder="Quantity" value="${inventory.quantity}">
+            `,
                     showCancelButton: true,
                     confirmButtonText: 'Update',
                     preConfirm: () => {

@@ -44,10 +44,17 @@
                     { data: 'machine.identifier', name: 'machine.identifier', title: 'Machine' },
                     { data: 'item.name', name: 'item.name', title: 'Item' },
                     { data: 'quantity', name: 'quantity' },
-                    { data: 'total_price', name: 'total_price' },
+                    {
+                        data: 'total_price',
+                        name: 'total_price',
+                        render: function(data, type, row) {
+                            return '₱' + parseFloat(data).toFixed(2);
+                        }
+                    },
                     { data: 'purchased_at', name: 'purchased_at' }
                 ]
             });
         });
     </script>
 @endpush
+

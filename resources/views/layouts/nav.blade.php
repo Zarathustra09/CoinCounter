@@ -1,7 +1,7 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-        <a class="sidebar-brand brand-logo" href="#"><img src="https://via.placeholder.com/100x200" alt="logo" width="100" height="200" /></a>
-        <a class="sidebar-brand brand-logo-mini" href="#"><img src="https://via.placeholder.com/100x200" alt="logo mini" width="100" height="200" /></a>
+        <a class="sidebar-brand brand-logo" href="#"><img src="{{asset('logo.png')}}" alt="logo" width="200" height="200" /></a>
+        <a class="sidebar-brand brand-logo-mini" href="#"><img src="{{asset('mini-logo.png')}}" alt="logo mini" width="100" height="200" /></a>
     </div>
     <ul class="nav">
         <li class="nav-item nav-category">
