@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\MachineController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ViewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +19,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/machine',[ViewController::class, 'machine'])->name('machine.blade');
+Route::get('/transaction',[ViewController::class, 'transaction'])->name('transaction.blade');
+Route::get('/item',[ViewController::class, 'item'])->name('item.blade');
+Route::get('/inventory',[ViewController::class, 'inventory'])->name('inventory.blade');

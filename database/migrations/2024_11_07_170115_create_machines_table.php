@@ -9,10 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('machines', function (Blueprint $table) {
             $table->id();
+            $table->string('location'); // e.g., library, cafeteria
+            $table->string('identifier')->unique(); // unique identifier for the machine
             $table->timestamps();
         });
     }

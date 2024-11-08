@@ -9,10 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('category'); // e.g., snack, drink
+            $table->decimal('price', 8, 2); // price per item
+            $table->string('image_path')->nullable(); // optional image path
             $table->timestamps();
         });
     }
